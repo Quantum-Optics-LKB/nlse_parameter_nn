@@ -262,10 +262,9 @@ def plot_generated_set(
     number_of_isat = len(isat)
     number_of_alpha = len(alpha)
 
-    field = data.copy().reshape(number_of_n2, number_of_isat, number_of_alpha, 3, data.shape[-2], data.shape[-2])
+    field = data.copy().reshape(number_of_n2, number_of_isat, number_of_alpha, 2, data.shape[-2], data.shape[-2])
     density_channels = field[:,  :, :, 0, :, :]
     phase_channels = field[:, :, :, 1, :, :]
-    uphase_channels = field[:, :, :, 2, :, :]
     
     n2_str = r"$n_2$"
     n2_u = r"$m^2$/$W$"
@@ -308,24 +307,11 @@ def plot_generated_set(
         plt.savefig(f'{saving_path}/phase_n2{number_of_n2}_isat{number_of_isat}_alpha{number_of_alpha}_{alpha_value}_power{input_power:.2f}.png')
         plt.close(fig_phase)
 
-        fig_uphase, axes_uphase = plt.subplots(number_of_n2, number_of_isat, figsize=(10*number_of_isat,10*number_of_n2), layout="tight")
-        fig_uphase.suptitle(f'Unwrapped Phase Channels - {puiss_str} = {input_power:.2e} {puiss_u} - {alpha_str} = {alpha_value:.2e} {alpha_u}')
-
-        for n2_index, n2_value in enumerate(n2):
-            for isat_index, isat_value in enumerate(isat):
-                ax = axes_uphase if number_of_n2 == 1 and number_of_isat == 1 else (axes_uphase[n2_index, isat_index] if number_of_n2 > 1 and number_of_isat > 1 else (axes_uphase[n2_index] if number_of_n2 > 1 else axes_uphase[isat_index]))
-                ax.imshow(uphase_channels[n2_index, isat_index, alpha_index, :, :], cmap='viridis')
-                ax.set_title(f'{n2_str} = {n2_value:.2e} {n2_u},\n{isat_str} = {isat_value:.2e} {isat_u}')
-                ax.axis('off')
-
-        plt.savefig(f'{saving_path}/unwrapped_phase_n2{number_of_n2}_isat{number_of_isat}_alpha{number_of_alpha}_{alpha_value}_power{input_power:.2f}.png')
-        plt.close(fig_phase)
 
 def plot_results(
         E: np.ndarray,
         density_experiment: np.ndarray, 
         phase_experiment: np.ndarray, 
-        uphase_experiment: np.ndarray, 
         numbers: tuple, 
         cameras: tuple, 
         number_of_n2: int, 
@@ -340,7 +326,6 @@ def plot_results(
     - E (np.ndarray): Experimental data.
     - density_experiment (np.ndarray): Experimental density data.
     - phase_experiment (np.ndarray): Experimental phase data.
-    - uphase_experiment (np.ndarray): Experimental unwrapped phase data.
     - numbers (tuple): Tuple containing computed_n2, input_power, computed_alpha, computed_isat, etc.
     - cameras (tuple): Tuple containing _, _, window_out, resolution_training.
     - number_of_n2 (int): Number of n2 parameters.
@@ -377,7 +362,7 @@ def plot_results(
     plt.rcParams['font.family'] = 'DejaVu Serif'
     plt.rcParams['font.size'] = 10
 
-    fig, axs = plt.subplots(3, 2, figsize=(10, 15), layout="tight")
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10), layout="tight")
     fig.suptitle(title)
 
     ims = []
@@ -385,9 +370,7 @@ def plot_results(
     ims.append(axs[0, 1].imshow(density_experiment, cmap="viridis", extent=extent))
     ims.append(axs[1, 0].imshow(E[0, 1, :, :], cmap="twilight_shifted", extent=extent))
     ims.append(axs[1, 1].imshow(phase_experiment, cmap="twilight_shifted", extent=extent))
-    ims.append(axs[2, 0].imshow(E[0, 2, :, :], cmap="viridis", extent=extent))
-    ims.append(axs[2, 1].imshow(uphase_experiment, cmap="viridis", extent=extent))
-    
+
     dividers = []
     for ax in axs.flatten():
         dividers.append(make_axes_locatable(ax))
@@ -399,10 +382,8 @@ def plot_results(
 
     axs[0, 0].set_title("Density")
     axs[1, 0].set_title("Normalized phase")
-    axs[2, 0].set_title("Normalized unwrapped phase")
     axs[0, 1].set_title("Experimental density")
     axs[1, 1].set_title("Experimental normalized phase")
-    axs[2, 1].set_title("Experimental unwrapped phase")
     for ax in axs.flatten():
         ax.set_xlabel(r"x (mm)")
         ax.set_ylabel(r"y (mm)")
@@ -413,7 +394,6 @@ def plot_sandbox(
         E: np.ndarray, 
         density_experiment: np.ndarray, 
         phase_experiment: np.ndarray, 
-        uphase_experiment: np.ndarray, 
         window_out: float,
         n2: float, 
         isat: float, 
@@ -427,7 +407,6 @@ def plot_sandbox(
     - E (np.ndarray): Experimental data.
     - density_experiment (np.ndarray): Experimental density data.
     - phase_experiment (np.ndarray): Experimental phase data.
-    - uphase_experiment (np.ndarray): Experimental unwrapped phase data.
     - window_out (float): Window size.
     - n2 (float): n2 parameter.
     - isat (float): isat parameter.
@@ -452,17 +431,15 @@ def plot_sandbox(
     title = f"{n2_str} = {scientific_formatter(n2)}{n2_u},"
     title += f" {isat_str} = {scientific_formatter(isat)}{isat_u},"
     title += f" {puiss_str} = {scientific_formatter(input_power)}{puiss_u},"
-    title+= f"{alpha_str} = {scientific_formatter(alpha)}{alpha_u}"
+    title += f"{alpha_str} = {scientific_formatter(alpha)}{alpha_u}"
 
-    fig, axs = plt.subplots(3, 2, figsize=(10, 15), layout="tight")
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10), layout="tight")
     fig.suptitle(title)
     ims = []
     ims.append(axs[0, 0].imshow(E[0, 0, :, :], cmap="viridis", extent=extent))
     ims.append(axs[0, 1].imshow(density_experiment, cmap="viridis", extent=extent))
     ims.append(axs[1, 0].imshow(E[0, 1, :, :], cmap="twilight_shifted", extent=extent))
     ims.append(axs[1, 1].imshow(phase_experiment, cmap="twilight_shifted", extent=extent))
-    ims.append(axs[2, 0].imshow(E[0, 2, :, :], cmap="viridis", extent=extent))
-    ims.append(axs[2, 1].imshow(uphase_experiment, cmap="viridis", extent=extent))
     dividers = []
     for ax in axs.flatten():
         dividers.append(make_axes_locatable(ax))
@@ -474,10 +451,8 @@ def plot_sandbox(
 
     axs[0, 0].set_title("Density")
     axs[1, 0].set_title("Normalized phase")
-    axs[2, 0].set_title("Normalized unwrapped phase")
     axs[0, 1].set_title("Experimental density")
     axs[1, 1].set_title("Experimental normalized phase")
-    axs[2, 1].set_title("Experimental unwrapped phase")
     for ax in axs.flatten():
         ax.set_xlabel(r"x (mm)")
         ax.set_ylabel(r"y (mm)")

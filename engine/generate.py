@@ -3,12 +3,10 @@
 # @author: Louis Rossignol
 
 import gc
-import torch
 import cupy as cp
 import numpy as np
 from tqdm import tqdm
 from NLSE import NLSE
-import kornia.augmentation as K
 from engine.utils import set_seed
 from cupyx.scipy.ndimage import zoom
 from scipy.constants import c, epsilon_0

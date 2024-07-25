@@ -114,7 +114,7 @@ def prepare_training(
 
     os.makedirs(new_path, exist_ok=True)
 
-    assert E.shape[1] == 3
+    assert E.shape[1] == 2
     assert E.shape[0] == n2_values.shape[0], f"field[0] is {E.shape[0]}, n2_values[0] is {n2_values.shape[0]}"
     assert E.shape[0] == isat_values.shape[0], f"field[0] is {E.shape[0]}, isat_values[0] is {isat_values.shape[0]}"
     assert E.shape[0] == alpha_values.shape[0], f"field[0] is {E.shape[0]}, alpha_values[0] is {alpha_values.shape[0]}"
