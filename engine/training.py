@@ -92,11 +92,13 @@ def network_training(
         net.train()
         
         for i, (images, n2_values, isat_values, alpha_values) in enumerate(trainloader, 0):
-            density = images.to(device = device, dtype=torch.float32)[:, [0], :, :]
-            phase = images.to(device = device, dtype=torch.float32)[:, [1], :, :]
-            density_augment = augment(density)
-            phase_augment = augment(phase)
-            images = torch.stack((density_augment[:, 0, :, :], phase_augment[:, 0, :, :]), dim=1)
+            images = images.to(device = device, dtype=torch.float32)
+            dummy_channel = torch.zeros((images.shape[0], 1, images.shape[2], images.shape[3]),dtype=torch.float32, device=device)
+            images = torch.cat((images, dummy_channel), dim=1)
+
+            images = augment(images)
+            images = images[:,0:2,:,:]
+
             n2_values = n2_values.to(device = device, dtype=torch.float32)
             isat_values = isat_values.to(device = device, dtype=torch.float32)
             alpha_values = alpha_values.to(device = device, dtype=torch.float32)
