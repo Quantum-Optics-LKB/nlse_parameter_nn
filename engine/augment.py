@@ -80,14 +80,12 @@ def data_augmentation(
         for original in range(originals):
             augmented_data[index,0 ,:, :] = E[image_index,0,:,:]
             augmented_data[index,1 ,:, :] = E[image_index,1,:,:]
-            augmented_data[index,2 ,:, :] = E[image_index,2,:,:]
             index += 1  
         for noise in noises:
             for angle in angles:
                 for num_lines in lines:
                     augmented_data[index,0 ,:, :] = normalize_data(line_noise(E[image_index,0,:,:], num_lines, np.max(E[image_index,0,:,:])*noise,angle))
                     augmented_data[index,1 ,:, :] = E[image_index,1,:,:]
-                    augmented_data[index,2 ,:, :] = E[image_index,2,:,:]
                     index += 1
               
     return augmented_data, labels
