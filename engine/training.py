@@ -117,7 +117,7 @@ def network_training(
                 optimizer.step()
                 optimizer.zero_grad()  # Clear gradients after updating weights
 
-            running_loss += loss_n2.item() + loss_isat.item()
+            running_loss += (loss_n2.item() + loss_isat.item() + loss_alpha.item())/3
         
         # Validation loop
         val_running_loss = 0.0
@@ -134,7 +134,7 @@ def network_training(
                 loss_isat = criterion(outputs_isat, isat_values)
                 loss_alpha = criterion(outputs_alpha, alpha_values)
                 
-                val_running_loss += loss_n2.item() + loss_isat.item() + loss_alpha.item()
+                val_running_loss += (loss_n2.item() + loss_isat.item() + loss_alpha.item())/3
 
         avg_val_loss = val_running_loss / len(validationloader)
         scheduler.step(avg_val_loss)

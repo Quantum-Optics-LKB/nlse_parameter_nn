@@ -54,7 +54,7 @@ def data_augmentation(
     angles = np.random.uniform(0,180,4)
     noises = np.random.uniform(0.1,0.4,1)
     lines = [50, 100]
-    originals = 16
+    originals = 32
     augmentation = len(lines) * len(noises) * len(angles) + originals
 
     indices = np.arange(len(n2_labels))
