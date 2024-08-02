@@ -94,10 +94,10 @@ def network_training(
         for i, (images, n2_values, isat_values, alpha_values) in enumerate(trainloader, 0):
             images = images.to(device = device, dtype=torch.float32)
             dummy_channel = torch.zeros((images.shape[0], 1, images.shape[2], images.shape[3]),dtype=torch.float32, device=device)
-            images = torch.cat((images, dummy_channel), dim=1)
+            images = torch.cat((images[:,[0,2],:,:], dummy_channel), dim=1)
 
             images = augment(images)
-            images = images[:,0:2,:,:]
+            images[:,[0,2],:,:] = images[:,0:2,:,:]
 
             n2_values = n2_values.to(device = device, dtype=torch.float32)
             isat_values = isat_values.to(device = device, dtype=torch.float32)

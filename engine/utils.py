@@ -42,25 +42,6 @@ def normalize_data(
     data /= np.max(data, axis=(-2, -1), keepdims=True)
     return data
 
-def general_extrema(
-        E: np.ndarray
-        ) -> np.ndarray:
-    """
-    Adjust phase array E to ensure non-negative values.
-
-    Parameters:
-    - E (np.ndarray): Input phase array.
-
-    Returns:
-    - np.ndarray: Adjusted phase array with non-negative values.
-    """
-    if E[E.shape[-2]//2, E.shape[-1]//2] > E[0, 0]:
-        E -= np.max(E)
-    elif E[E.shape[-2]//2, E.shape[-1]//2] < 0:
-        E -= np.min(E)
-    E = np.abs(E)
-    return E
-
 def phase_flip(img, probability=0.5):
     """Randomly flips the ups and downs of phase rings in the image."""
     if torch.rand(1).item() < probability:
@@ -129,35 +110,6 @@ def experiment_noise(
 
     noisy_beam = noisy_beam.astype(np.complex64)
     return noisy_beam
-
-def line_noise(
-        image: np.ndarray,
-        num_lines: int, 
-        amplitude: float, 
-        angle: float
-        ) -> np.ndarray:
-    """
-    Add sinusoidal lines pattern noise to an image.
-
-    Parameters:
-    - image (np.ndarray): Input image array.
-    - num_lines (int): Number of lines.
-    - amplitude (float): Amplitude of the lines pattern.
-    - angle (float): Angle of the lines pattern (degrees).
-
-    Returns:
-    - np.ndarray: Noisy image array.
-    """
-    height, width = image.shape
-    angle_rad = np.radians(angle)
-    X, Y = np.meshgrid(np.arange(width), np.arange(height))
-    X_rotated = X * np.cos(angle_rad) + Y * np.sin(angle_rad)
-    diagonal_length = np.sqrt(width**2 + height**2)
-    wave_frequency = (num_lines * 2 * np.pi) / diagonal_length
-    lines_pattern =  amplitude*np.sin(X_rotated * wave_frequency)
-    noisy_image = image.copy() + lines_pattern
-    
-    return noisy_image
 
 def set_seed(
         seed: int
@@ -289,9 +241,9 @@ def plot_generated_set(
     number_of_isat = len(isat)
     number_of_alpha = len(alpha)
 
-    field = data.copy().reshape(number_of_n2, number_of_isat, number_of_alpha, 2, data.shape[-2], data.shape[-2])
+    field = data.copy().reshape(number_of_n2, number_of_isat, number_of_alpha, 4, data.shape[-2], data.shape[-1])
     density_channels = field[:,  :, :, 0, :, :]
-    phase_channels = field[:, :, :, 1, :, :]
+    phase_channels = field[:, :, :, 2, :, :]
     
     n2_str = r"$n_2$"
     n2_u = r"$m^2$/$W$"
@@ -337,8 +289,10 @@ def plot_generated_set(
 
 def plot_results(
         E: np.ndarray,
-        density_experiment: np.ndarray, 
-        phase_experiment: np.ndarray, 
+        density_experiment: np.ndarray,
+        hog_density_experiment: np.ndarray, 
+        phase_experiment: np.ndarray,
+        hog_phase_experiment: np.ndarray, 
         numbers: tuple, 
         cameras: tuple, 
         number_of_n2: int, 
@@ -395,7 +349,7 @@ def plot_results(
     ims = []
     ims.append(axs[0, 0].imshow(E[0, 0, :, :], cmap="viridis", extent=extent))
     ims.append(axs[0, 1].imshow(density_experiment, cmap="viridis", extent=extent))
-    ims.append(axs[1, 0].imshow(E[0, 1, :, :], cmap="twilight_shifted", extent=extent))
+    ims.append(axs[1, 0].imshow(E[0, 2, :, :], cmap="twilight_shifted", extent=extent))
     ims.append(axs[1, 1].imshow(phase_experiment, cmap="twilight_shifted", extent=extent))
 
     dividers = []
@@ -465,7 +419,7 @@ def plot_sandbox(
     ims = []
     ims.append(axs[0, 0].imshow(E[0, 0, :, :], cmap="viridis", extent=extent))
     ims.append(axs[0, 1].imshow(density_experiment, cmap="viridis", extent=extent))
-    ims.append(axs[1, 0].imshow(E[0, 1, :, :], cmap="twilight_shifted", extent=extent))
+    ims.append(axs[1, 0].imshow(E[0, 2, :, :], cmap="twilight_shifted", extent=extent))
     ims.append(axs[1, 1].imshow(phase_experiment, cmap="twilight_shifted", extent=extent))
     dividers = []
     for ax in axs.flatten():

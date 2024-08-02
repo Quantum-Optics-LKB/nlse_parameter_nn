@@ -5,6 +5,7 @@
 import torch
 import numpy as np
 from scipy.ndimage import zoom
+from skimage.feature import hog
 from engine.utils import normalize_data
 from engine.generate import data_creation
 from engine.model import Inception_ResNetv2
@@ -74,9 +75,18 @@ def get_parameters(
     phase_experiment = normalize_data(zoom(phase_experiment, 
                 (resolution_training/field.shape[-2], resolution_training/field.shape[-1]))).astype(np.float16)
     
-    E = np.zeros((1, 2, 256, 256), dtype=np.float16)
+    fd, hog_phase_experiment = hog(phase_experiment[np.newaxis,:,:], orientations=8, pixels_per_cell=(6, 6), 
+                          cells_per_block=(2, 2), visualize=True, channel_axis=0)
+
+    fd, hog_density_experiment = hog(density_experiment[np.newaxis,:,:], orientations=8, pixels_per_cell=(6, 6), 
+                        cells_per_block=(2, 2), visualize=True, channel_axis=0)
+
+    
+    E = np.zeros((1, 4, 256, 256), dtype=np.float16)
     E[0, 0, :, :] = density_experiment
-    E[0, 1, :, :] = phase_experiment
+    E[0, 1, :, :] = hog_density_experiment[0,:,:].astype(np.float16)
+    E[0, 2, :, :] = phase_experiment
+    E[0, 3, :, :] = hog_phase_experiment[0,:,:].astype(np.float16)
     
     with torch.no_grad():
         images = torch.from_numpy(E).float().to(device)

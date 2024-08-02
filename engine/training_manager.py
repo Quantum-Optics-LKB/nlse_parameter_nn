@@ -114,7 +114,7 @@ def prepare_training(
 
     os.makedirs(new_path, exist_ok=True)
 
-    assert E.shape[1] == 2
+    assert E.shape[1] == 4
     assert E.shape[0] == n2_values.shape[0], f"field[0] is {E.shape[0]}, n2_values[0] is {n2_values.shape[0]}"
     assert E.shape[0] == isat_values.shape[0], f"field[0] is {E.shape[0]}, isat_values[0] is {isat_values.shape[0]}"
     assert E.shape[0] == alpha_values.shape[0], f"field[0] is {E.shape[0]}, alpha_values[0] is {alpha_values.shape[0]}"
@@ -166,7 +166,7 @@ def manage_training(
     """
 
     number_of_n2, _, number_of_isat, _, number_of_alpha, _ = labels
-    n2, input_power, alpha, isat, waist_input_beam, non_locality_length, delta_z, cell_length = nlse_settings
+    n2, input_power, alpha, isat, waist_input_beam, non_locality_length, _, _ = nlse_settings
     cnn, optimizer, criterion, scheduler, num_epochs, accumulation_steps, device = model_settings
 
     orig_stdout = sys.stdout

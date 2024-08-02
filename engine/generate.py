@@ -7,6 +7,7 @@ import cupy as cp
 import numpy as np
 from tqdm import tqdm
 from NLSE import NLSE
+from skimage.feature import hog
 from engine.utils import set_seed
 from cupyx.scipy.ndimage import zoom
 from scipy.constants import c, epsilon_0
@@ -77,7 +78,7 @@ def data_creation(
     beam = np.ones((number_of_isat, number_of_alpha, resolution_in, resolution_in), dtype=np.complex64)*np.exp(-(XX**2 + YY**2) / waist**2)
     poisson_noise_lam, normal_noise_sigma = 0.1 , 0.01
     beam = experiment_noise(beam, poisson_noise_lam, normal_noise_sigma)
-    E = np.zeros((number_of_n2*number_of_isat*number_of_alpha,2, resolution_training, resolution_training), dtype=np.float16)
+    E = np.zeros((number_of_n2*number_of_isat*number_of_alpha,4, resolution_training, resolution_training), dtype=np.float16)
       
     for index, n2_value in tqdm(enumerate(n2),desc=f"NLSE", total=number_of_n2, unit="n2"):
 
@@ -111,10 +112,18 @@ def data_creation(
       gc.collect()
       cp.get_default_memory_pool().free_all_blocks()
 
+      fd, hog_phase = hog(phase, orientations=8, pixels_per_cell=(6, 6), 
+                          cells_per_block=(2, 2), visualize=True, channel_axis=0)
+
+      fd, hog_density = hog(density, orientations=8, pixels_per_cell=(6, 6), 
+                          cells_per_block=(2, 2), visualize=True, channel_axis=0)
+
       start_index = number_of_isat * number_of_alpha * index
       end_index = number_of_isat * number_of_alpha * (index + 1)
       E[start_index:end_index,0,:,:] = density
-      E[start_index:end_index,1,:,:] = phase
+      E[start_index:end_index,1,:,:] = hog_density.astype(np.float16)
+      E[start_index:end_index,2,:,:] = phase
+      E[start_index:end_index,3,:,:] = hog_phase.astype(np.float16)
 
     if saving_path != "":
       np.save(f'{saving_path}/Es_w{resolution_training}_n2{number_of_n2}_isat{number_of_isat}_alpha{number_of_alpha}_power{input_power:.2f}', E)
