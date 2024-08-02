@@ -62,7 +62,7 @@ def network_init(
     """
     cnn = model(channels)
     weight_decay = 1e-5
-    criterion = nn.HuberLoss(reduction='mean')
+    criterion = nn.MSELoss(reduction='mean')
     optimizer = torch.optim.Adam(cnn.parameters(), lr=learning_rate, weight_decay=weight_decay)
     scheduler = ReduceLROnPlateau(optimizer, mode='min')
 

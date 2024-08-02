@@ -55,8 +55,8 @@ def test_model(
         This function tests the model using the provided DataLoader and computes the Mean Squared Error (MSE) and Mean Absolute Error (MAE) for the model's predictions on `n2`, `isat`, and `alpha` values. It prints the average MSE and MAE for these predictions.
     """
     
-    mse_loss = torch.nn.MSELoss(reduction='mean')
-    mae_loss = torch.nn.L1Loss(reduction='mean')
+    mse_loss = torch.nn.MSELoss(reduction='sum')
+    mae_loss = torch.nn.L1Loss(reduction='sum')
     
     mse_n2 = 0
     mse_isat = 0

@@ -6,7 +6,7 @@ import os
 import torch
 import random
 import numpy as np
-import kornia.augmentation as K
+import kornia as K
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -61,6 +61,13 @@ def general_extrema(
     E = np.abs(E)
     return E
 
+def phase_flip(img, probability=0.5):
+    """Randomly flips the ups and downs of phase rings in the image."""
+    if torch.rand(1).item() < probability:
+        # Flip phase by adding 0.5 and wrapping around the [0, 1] range
+        img[:, 1, :, :] = (img[:, 1, :, :] + 0.5) % 1.0
+    return img
+
 def elastic_saltpepper() -> torch.nn.Sequential:
     """
     Create a sequential transformation pipeline for elastic and salt-pepper noise.
@@ -68,14 +75,34 @@ def elastic_saltpepper() -> torch.nn.Sequential:
     Returns:
     - torch.nn.Sequential: Sequential transformation pipeline.
     """
-    
+
     elastic_sigma = (random.randrange(35, 42, 2), random.randrange(35, 42, 2))
     elastic_alpha = (1, 1)
     salt_pepper = random.uniform(0.01, .11)
+    rotation = random.randrange(0, 10)
+
+    class RandomPhaseFlip(torch.nn.Module):
+        def __init__(self, p=0.5):
+            super(RandomPhaseFlip, self).__init__()
+            self.p = p
+
+        def forward(self, img):
+            return phase_flip(img, self.p)
+
     return torch.nn.Sequential(
-        K.RandomElasticTransform(kernel_size=51, sigma=elastic_sigma, alpha=elastic_alpha ,p=.5),
-        K.RandomSaltAndPepperNoise(amount=salt_pepper,salt_vs_pepper=(.5, .5), p=.2),
+        K.augmentation.RandomElasticTransform(kernel_size=51, sigma=elastic_sigma, alpha=elastic_alpha, p=.5, keepdim=True),
+        K.augmentation.RandomSaltAndPepperNoise(amount=salt_pepper, salt_vs_pepper=(.5, .5), p=.15, keepdim=True),
+        RandomPhaseFlip(p=0.5),
+        K.augmentation.RandomRotation(degrees=rotation, p=1, keepdim=True),
+        K.augmentation.RandomSaturation(saturation=(1.5, 1.5),p=0.5, keepdim=True)
     )
+
+def phase_flip(img, probability=0.5):
+    """Randomly flips the ups and downs of phase rings in the image."""
+    if torch.rand(1).item() < probability:
+        # Flip phase by adding 0.5 and wrapping around the [0, 1] range
+        img = (img + 0.5) % 1.0
+    return img
 
 def experiment_noise(
         beam: np.ndarray, 

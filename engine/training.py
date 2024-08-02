@@ -115,7 +115,7 @@ def network_training(
 
             if (i + 1) % accumulation_steps == 0 or accumulation_steps == 1:
                 optimizer.step()
-                optimizer.zero_grad()  # Clear gradients after updating weights
+                optimizer.zero_grad() 
 
             running_loss += (loss_n2.item() + loss_isat.item() + loss_alpha.item())/3
         
@@ -136,14 +136,13 @@ def network_training(
                 
                 val_running_loss += (loss_n2.item() + loss_isat.item() + loss_alpha.item())/3
 
-        avg_val_loss = val_running_loss / len(validationloader)
-        scheduler.step(avg_val_loss)
+        scheduler.step(val_running_loss)
 
         current_lr = scheduler.get_last_lr()  # Get current learning rate after update
-        print(f'Epoch {epoch+1}, Train Loss: {running_loss / len(trainloader):.4f}, Validation Loss: {avg_val_loss:.4f}, Current LR: {current_lr[0]}')
+        print(f'Epoch {epoch+1}, Train Loss: {running_loss:.4f}, Validation Loss: {val_running_loss:.4f}, Current LR: {current_lr[0]}')
 
-        loss_list.append(running_loss / len(trainloader))
-        val_loss_list.append(avg_val_loss)
+        loss_list.append(running_loss)
+        val_loss_list.append(val_running_loss)
 
         save_checkpoint({
             'epoch': epoch + 1,
