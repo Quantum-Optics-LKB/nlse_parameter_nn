@@ -60,7 +60,7 @@ def get_parameters(
     max_alpha = alpha.max()
 
     device = torch.device(f"cuda:{device_number}")
-    cnn = Inception_ResNetv2(in_channels=2)
+    cnn = Inception_ResNetv2(in_channels=4)
     cnn.to(device)
 
     directory_path = f'{saving_path}/training_n2{number_of_n2}_isat{number_of_isat}_alpha{number_of_alpha}_power{in_power:.2f}/'
@@ -84,9 +84,9 @@ def get_parameters(
     
     E = np.zeros((1, 4, 256, 256), dtype=np.float16)
     E[0, 0, :, :] = density_experiment
-    E[0, 1, :, :] = hog_density_experiment[0,:,:].astype(np.float16)
+    E[0, 1, :, :] = hog_density_experiment.astype(np.float16)
     E[0, 2, :, :] = phase_experiment
-    E[0, 3, :, :] = hog_phase_experiment[0,:,:].astype(np.float16)
+    E[0, 3, :, :] = hog_phase_experiment.astype(np.float16)
     
     with torch.no_grad():
         images = torch.from_numpy(E).float().to(device)
@@ -104,6 +104,6 @@ def get_parameters(
 
         numbers = np.array([computed_n2]), in_power, np.array([computed_alpha]), np.array([computed_isat]), waist, nl_length, delta_z, length
         E = data_creation(numbers, cameras, device_number)
-        plot_results(E, density_experiment, phase_experiment,numbers, cameras, number_of_n2, number_of_isat, number_of_alpha, saving_path)
+        plot_results(E, density_experiment, hog_density_experiment, phase_experiment, hog_phase_experiment, numbers, cameras, number_of_n2, number_of_isat, number_of_alpha, saving_path)
     
     return computed_n2, computed_isat, computed_alpha

@@ -44,8 +44,8 @@ def experiment(
 
     fd, hog_density_experiment = hog(density_experiment[np.newaxis,:,:], orientations=8, pixels_per_cell=(6, 6), 
                         cells_per_block=(2, 2), visualize=True, channel_axis=0)
-
-    return density_experiment, hog_density_experiment[0,:,:].astype(np.float16), phase_experiment, hog_phase_experiment[0,:,:].astype(np.float16)
+    
+    return density_experiment, hog_density_experiment.astype(np.float16), phase_experiment, hog_phase_experiment.astype(np.float16)
 
 def sandbox(
         device: int, 
@@ -103,4 +103,4 @@ def sandbox(
 
     density_experiment, hog_density_experiment, phase_experiment, hog_phase_experiment = experiment(resolution_training, exp_image_path)
 
-    plot_sandbox(E, density_experiment, hog_density_experiment, phase_experiment, hog_phase_experiment, window_out, n2, isat, alpha, input_power, saving_path)  
+    plot_sandbox(E, density_experiment, phase_experiment, window_out, n2, isat, alpha, input_power, saving_path)  

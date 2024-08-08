@@ -61,10 +61,10 @@ def network_init(
         This function initializes the neural network model (specified by `model`), creates an Adam optimizer with the specified learning rate, initializes Mean Squared Error (MSE) loss criterion, and sets up a ReduceLROnPlateau scheduler for the optimizer. It returns these initialized components as a tuple.
     """
     cnn = model(channels)
-    weight_decay = 1e-5
+    weight_decay = 1e-3
     criterion = nn.MSELoss(reduction='mean')
     optimizer = torch.optim.Adam(cnn.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min')
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, min_lr=1e-5)
 
     return cnn, optimizer, criterion, scheduler
 
